@@ -1,3 +1,5 @@
+// used code snippets from various examples provided on https://threejs.org/examples/
+
 import "./styles.css";
 import * as THREE from "three";
 import { OrbitControls } from "./jsm/OrbitControls";
@@ -8,6 +10,7 @@ import { Line2 } from "./jsm/Line2";
 const width = window.innerWidth;
 const height = window.innerHeight;
 
+// the points of the main path
 const MAX_POINTS = 100;
 
 const camera = new THREE.PerspectiveCamera(40, width / height, 1, 10000);
@@ -21,17 +24,20 @@ let lineLengths = [];
 let lines = [];
 let pipePoints = [];
 
+// this is used to create the main path lines (two: one is a reflection)
 const createNewLine = (colors, positions, linewidth = 0.002) => {
   let geometry = new LineGeometry();
 
   geometry.setPositions(positions);
   geometry.setColors(colors);
   geometries.push(geometry);
+
+  // a dashed line is used as a workaround to be able to
+  // animate the line growing outwards
   let matLine = new LineMaterial({
     color: 0xffffff,
-    linewidth, // in pixels
+    linewidth,
     vertexColors: true,
-    //resolution:  // to be set by renderer, eventually
     dashed: true,
     dashSize: 1,
     gapSize: 1e9,
@@ -44,6 +50,7 @@ const createNewLine = (colors, positions, linewidth = 0.002) => {
   return line;
 };
 
+// this is for the coloured planes
 const createPlaneAt = (x, y, z, axis) => {
   var geometry = new THREE.PlaneBufferGeometry(2, 2, 10, 10);
   var material = new THREE.MeshBasicMaterial({
@@ -54,8 +61,14 @@ const createPlaneAt = (x, y, z, axis) => {
   var plane = new THREE.Mesh(geometry, material);
   let square = THREE.MathUtils.degToRad(90);
   let neg = THREE.MathUtils.randInt(0, 1);
+
+  // randomly assign the plane to one of the halves of the world
+  // aka one of the reflections across each axis
   let mult = neg === 1 ? 1 : -1;
 
+  // depending on which axis the red lines are formed from,
+  // rotate the planes
+  // the offsets are to line up the planes with the lines
   switch (axis) {
     case "x":
       plane.rotation.set(0, square, 0);
@@ -83,8 +96,10 @@ const createPlaneAt = (x, y, z, axis) => {
   scene.add(plane);
 };
 
+// for the final tunnel
 const createTubeAt = (lineLength) => {
-  //Create a closed wavey loop
+  // create a curve using the center points of all
+  // the planes
   var curve = new THREE.CatmullRomCurve3(pipePoints);
   var geometry = new THREE.TubeGeometry(
     curve,
@@ -103,7 +118,9 @@ const createTubeAt = (lineLength) => {
   scene.add(mesh);
 };
 
+// this is for the path reversal lines
 const createNewLineAt = (x, y, z, axis) => {
+  // currently hardcoded to red, but can use this later
   const colorByAxis = {
     x: 0xc7170a,
     y: 0x3449eb,
@@ -112,6 +129,7 @@ const createNewLineAt = (x, y, z, axis) => {
   let positionsTemp = new Float32Array(6);
   let colorsTemp = [];
 
+  // small offset to avoid overlapping lines glitching
   positionsTemp[0] = x + 0.001;
   positionsTemp[1] = y + 0.001;
   positionsTemp[2] = z + 0.001;
@@ -123,7 +141,6 @@ const createNewLineAt = (x, y, z, axis) => {
     let c = new THREE.Color(colorByAxis["x"]);
     colorsTemp.push(c.r, c.g, c.b);
   }
-  // let newLine = createNewLine(colorsTemp, positionsTemp, 0.0015, 0.2);
   let geometry = new LineGeometry();
 
   geometry.setPositions(positionsTemp);
@@ -131,9 +148,8 @@ const createNewLineAt = (x, y, z, axis) => {
   geometries.push(geometry);
   let matLine = new LineMaterial({
     color: 0xffffff,
-    linewidth: 0.0012, // in pixels
+    linewidth: 0.0012,
     vertexColors: true,
-    //resolution:  // to be set by renderer, eventually
     dashed: true,
     dashSize: 0.01,
     gapSize: 0.01,
@@ -148,8 +164,13 @@ const createNewLineAt = (x, y, z, axis) => {
   return line;
 };
 
+// positions of first main line
 let positions = new Float32Array(MAX_POINTS * 3.0);
+// positions of second main line
 let positions2 = new Float32Array(MAX_POINTS * 3.0);
+// distances to calculate the line animation
+// (need to track the total length to be able to
+// calculate what fraction should be showing)
 let lineDistances = new Float32Array(MAX_POINTS);
 
 let x = 0,
@@ -160,8 +181,11 @@ let x = 0,
 let colors = [];
 
 let lastVectors = [x, y, z];
+// bad form, garbage placeholders
 let lastRevisions = ["s", "t", "r"];
 
+// generate the random points
+// must be along edges of cube
 for (let i = 0, l = MAX_POINTS; i < l; i++) {
   positions2[i * 3] = x * -1;
   positions2[i * 3 + 1] = y * -1;
@@ -174,25 +198,34 @@ for (let i = 0, l = MAX_POINTS; i < l; i++) {
   colors.push(color.r, color.g, color.b);
 
   points.push(new THREE.Vector3(x, y, z));
-  // if the direction is in the exact opposite
-  // as the last one, draw a red wire circle
-  // or sum of the last 3 pts
+
+  // the following determines the random point's direction vector
   let dimension = THREE.MathUtils.randInt(0, 2);
   let direction = THREE.MathUtils.randInt(0, 1) === 0 ? 1 : -1;
+  // hard coded to 1
   let magnitude = THREE.MathUtils.randInt(1, 1);
+
+  // keep track of last direction of path
   let lastXDir = lastVectors[0];
   let lastYDir = lastVectors[1];
   let lastZDir = lastVectors[2];
+
+  // dimension x = 0, y = 1, z = 2
   switch (dimension) {
     case 0:
       let xDir = direction * magnitude;
       if (xDir * lastXDir !== 0 && xDir * lastXDir < 0) {
+        // create path reversal line if new vector
+        // is opposite of last
         createNewLineAt(x, y, z, "x");
         createNewLineAt(-x, -y, -z, "x");
         lastRevisions.push("x");
+        // this checks if the last two reversals are in the
+        // same direction, and if a plane should be created
         if (
           lastRevisions[lastRevisions.length - 1] ===
             lastRevisions[lastRevisions.length - 2] &&
+          // probability that it should be rendered
           THREE.MathUtils.randInt(0, 10) > 5
         ) {
           createPlaneAt(x, y, z, "x", magnitude);
@@ -274,10 +307,11 @@ controls.enableZoom = true;
 controls.target = new THREE.Vector3(0, 0, 0);
 
 let fraction = 0;
-// setInterval(updateTrace, 1000);
 
 const animate = () => {
   requestAnimationFrame(animate);
+
+  // workaround to animate the main lines
   fraction = fraction + 0.0001 >= 1 ? 1 : fraction + 0.0003; // fraction in [ 0, 1 ]
   lines[0].material.dashSize = fraction * lineLengths[0];
   lines[0].geometry.attributes.position.needsUpdate = true;
