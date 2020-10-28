@@ -13,24 +13,23 @@ const height = window.innerHeight;
 // the points of the main path
 const MAX_POINTS = 100;
 
+// args: FOV, aspect, near plane, far plane
 const camera = new THREE.PerspectiveCamera(40, width / height, 1, 10000);
 camera.position.z = 10;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 
-let geometries = [];
 let lineLengths = [];
 let lines = [];
 let pipePoints = [];
 
-// this is used to create the main path lines (two: one is a reflection)
+// this is used to create the main path lines
 const createNewLine = (colors, positions, linewidth = 0.002) => {
   let geometry = new LineGeometry();
 
   geometry.setPositions(positions);
   geometry.setColors(colors);
-  geometries.push(geometry);
 
   // a dashed line is used as a workaround to be able to
   // animate the line growing outwards
@@ -53,12 +52,15 @@ const createNewLine = (colors, positions, linewidth = 0.002) => {
 // this is for the coloured planes
 const createPlaneAt = (x, y, z, axis) => {
   var geometry = new THREE.PlaneBufferGeometry(2, 2, 10, 10);
+  // set colour based on what plane the direction of the lines it is based on
   var material = new THREE.MeshBasicMaterial({
     color: axis === "x" ? 0x595eab : axis === "y" ? 0xc7170a : 0xc2be59,
     side: THREE.DoubleSide,
     wireframe: true,
   });
   var plane = new THREE.Mesh(geometry, material);
+
+  // get radians to rotate planes
   let square = THREE.MathUtils.degToRad(90);
   let neg = THREE.MathUtils.randInt(0, 1);
 
@@ -73,6 +75,7 @@ const createPlaneAt = (x, y, z, axis) => {
     case "x":
       plane.rotation.set(0, square, 0);
       plane.position.set(x * mult, (y + 0.5) * mult, (z + 0.5) * mult);
+      // store points to make tunnel later
       pipePoints.push(
         new THREE.Vector3(x * mult, (y + 0.5) * mult, (z + 0.5) * mult)
       );
@@ -145,7 +148,7 @@ const createNewLineAt = (x, y, z, axis) => {
 
   geometry.setPositions(positionsTemp);
   geometry.setColors(colorsTemp);
-  geometries.push(geometry);
+
   let matLine = new LineMaterial({
     color: 0xffffff,
     linewidth: 0.0012,
@@ -187,6 +190,7 @@ let lastRevisions = ["s", "t", "r"];
 // generate the random points
 // must be along edges of cube
 for (let i = 0, l = MAX_POINTS; i < l; i++) {
+  // store points for both lines (one is for the reflection)
   positions2[i * 3] = x * -1;
   positions2[i * 3 + 1] = y * -1;
   positions2[i * 3 + 2] = z * -1;
@@ -231,6 +235,7 @@ for (let i = 0, l = MAX_POINTS; i < l; i++) {
           createPlaneAt(x, y, z, "x", magnitude);
         }
       }
+      // update current point / last direction data
       lastVectors[0] = xDir;
       x += direction * magnitude;
       break;
@@ -277,18 +282,21 @@ for (let i = 0, l = MAX_POINTS; i < l; i++) {
 }
 lineLengths[0] = lineDistances[MAX_POINTS - 1];
 
+// create the path line
 let mainLine = createNewLine(colors, positions, 0.0014);
 mainLine.computeLineDistances();
 mainLine.material.defines.USE_DASH = "";
 mainLine.material.needsUpdate = true;
 lines.push(mainLine);
 
+// create its reflection
 let mainLine2 = createNewLine(colors, positions2, 0.0014);
 mainLine2.computeLineDistances();
 mainLine2.material.defines.USE_DASH = "";
 mainLine2.material.needsUpdate = true;
 lines.push(mainLine2);
 
+// create the tube
 createTubeAt(lineLengths[0]);
 
 const renderer = new THREE.WebGLRenderer({
@@ -298,6 +306,9 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(width, height);
 renderer.setClearColor(0x000000, 0.0);
 
+// note: orbitcontrols have custom edit to allow zoom by FOV instead of dollying
+// which is needed because by default it changed position to zoom
+// which doesn't work when the camera is moving
 const controls = new OrbitControls(camera, renderer.domElement);
 
 controls.minDistance = 1;
@@ -319,6 +330,7 @@ const animate = () => {
   lines[1].material.dashSize = fraction * lineLengths[0];
   lines[1].geometry.attributes.position.needsUpdate = true;
 
+  // animate the camera path
   var time = -performance.now() * 0.0003;
   camera.position.x = 10 * Math.cos(time / 5);
   camera.position.z = 10 * Math.sin(time / 5);
