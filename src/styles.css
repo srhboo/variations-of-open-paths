@@ -1,5 +1,186 @@
 html,
 body {
-  font-family: sans-serif;
+  font-family: "VT323", monospace;
   margin: 0;
+  overflow: hidden;
+}
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* make scrollbar transparent */
+}
+button {
+  font-family: "VT323", monospace;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  z-index: 1;
+  border-radius: 0;
+  /* transition: color 0.25s linear 0s;
+  transition: background-color 0.25s linear 0s; */
+}
+button:focus,
+button:active {
+  border-radius: 0;
+}
+ul {
+  list-style: none;
+  padding: 0;
+}
+li {
+  margin-bottom: 2rem;
+  padding: 0;
+}
+#ui {
+  position: absolute;
+  font-size: 1.5rem;
+
+  /* border: 1px solid red; */
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  /* padding: 2rem; */
+  top: 2rem;
+  left: 2rem;
+}
+.ui-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: black;
+  opacity: 0.5;
+}
+.text {
+  z-index: 1;
+}
+.generate {
+  background: none;
+  font-size: 2rem;
+  color: #fff;
+  border: 1px solid #fff;
+}
+.generate:hover {
+  color: rgb(247, 206, 233);
+}
+#keep {
+  background: none;
+  font-size: 1.5rem;
+  color: #fff;
+  border: 1px solid #fff;
+  z-index: 1;
+  position: relative;
+}
+#keep:hover {
+  background-color: white;
+  color: black;
+}
+.keep-wrapper {
+  position: absolute;
+  bottom: 2rem;
+}
+#question,
+#audio {
+  background: none;
+  font-size: 2rem;
+  color: #fff;
+  border: 1px solid #fff;
+  position: absolute;
+  right: 2rem;
+  top: 2rem;
+}
+#question:hover {
+  color: #3c61f0;
+}
+#social {
+  background: none;
+  font-size: 2rem;
+  color: #fff;
+  border: 1px solid #fff;
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
+  padding: 1rem;
+  text-decoration: none;
+}
+#social:hover {
+  color: #d6ad3d;
+}
+#audio {
+  right: 6rem;
+  opacity: 1;
+  color: yellow;
+}
+#audio:hover {
+  color: yellow;
+}
+#audio.muted {
+  border: 1px solid white;
+  color: white;
+}
+#close {
+  background: none;
+  font-size: 2rem;
+  padding: 0.5rem 1rem;
+  color: white;
+  background-color: black;
+  border: 1px solid white;
+  width: 12rem;
+}
+#close:hover {
+  background-color: red;
+  color: black;
+  border-color: black;
+}
+#controls {
+  background: none;
+  font-size: 2rem;
+  padding: 0.5rem 1rem;
+  color: white;
+  background-color: black;
+  border: 1px solid white;
+  width: 12rem;
+  margin-bottom: 1rem;
+}
+#controls:hover {
+  background-color: blue;
+  color: black;
+  border-color: black;
+}
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#about {
+  padding: 6rem;
+  opacity: 0.95;
+  height: 70%;
+  width: 70%;
+  background: black;
+  font-size: 2rem;
+  color: #fff;
+  border: 1px solid #fff;
+  position: absolute;
+  z-index: 3;
+  display: none;
+  overflow-y: scroll;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+h3 {
+  margin: 0;
+}
+#description {
+  display: flex;
+  flex-direction: column;
+}
+#howto {
+  display: none;
+}
+#about p {
+  margin-top: 0;
 }
