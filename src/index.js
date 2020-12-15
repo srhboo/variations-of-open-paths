@@ -183,7 +183,7 @@ const createTubeAt = (lineLength, pipePoints) => {
     color: colorByAxis["red"],
     wireframe: true,
     transparent: true,
-    opacity: 0.6,
+    opacity: 0.3,
   });
   materials.push(material);
   var mesh = new THREE.Mesh(geometry, material);
