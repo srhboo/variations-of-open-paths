@@ -1,11 +1,11 @@
 import "regenerator-runtime/runtime";
-import "./styles.css";
 import * as THREE from "three";
 import { OrbitControls } from "./jsm/OrbitControls";
 import { LineGeometry } from "./jsm/LineGeometry";
 import { LineMaterial } from "./jsm/LineMaterial";
 import { Line2 } from "./jsm/Line2";
 import * as Tone from "tone";
+import "./styles.css";
 // used code snippets from various examples provided on https://threejs.org/examples/
 
 // CONSTANTS
