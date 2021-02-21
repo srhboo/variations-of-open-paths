@@ -1,4 +1,4 @@
-var socket = io("http://localhost:3000");
+var socket = io("https://diligent-nine-guitar.glitch.me/");
 var messages = document.getElementById("messages");
 var messageForm = document.getElementById("message-form");
 var messageInput = document.getElementById("message-input");
