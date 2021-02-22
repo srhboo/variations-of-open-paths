@@ -1,10 +1,11 @@
 import "regenerator-runtime/runtime";
+import * as Tone from "tone";
 import * as THREE from "three";
 import { OrbitControls } from "./jsm/OrbitControls";
 import { LineGeometry } from "./jsm/LineGeometry";
 import { LineMaterial } from "./jsm/LineMaterial";
 import { Line2 } from "./jsm/Line2";
-import * as Tone from "tone";
+
 import "./styles.css";
 // used code snippets from various examples provided on https://threejs.org/examples/
 
@@ -24,10 +25,6 @@ const colorByAxis = {
 // DEFINE
 let camera, scene, renderer, controls, raycaster, INTERSECTED;
 const mouse = new THREE.Vector2();
-
-let playGeometry;
-
-let freeze = false;
 
 let pathLine1, pathLine2, pipePoints;
 let pathLength;
@@ -357,22 +354,20 @@ let fraction = 0;
 const animate = () => {
   requestAnimationFrame(animate);
 
-  if (!freeze) {
-    // workaround to animate the main lines
-    fraction = fraction + 0.0001 >= 1 ? 1 : fraction + 0.0003; // fraction in [ 0, 1 ]
-    pathLine1.material.dashSize = fraction * pathLength;
-    pathLine1.geometry.attributes.position.needsUpdate = true;
+  // workaround to animate the main lines
+  fraction = fraction + 0.0001 >= 1 ? 1 : fraction + 0.0003; // fraction in [ 0, 1 ]
+  pathLine1.material.dashSize = fraction * pathLength;
+  pathLine1.geometry.attributes.position.needsUpdate = true;
 
-    pathLine2.material.dashSize = fraction * pathLength;
-    pathLine2.geometry.attributes.position.needsUpdate = true;
-    // animate the camera path
-    var time = -performance.now() * 0.0003;
-    camera.position.x = 10 * Math.cos(time / 5);
-    camera.position.z = 10 * Math.sin(time / 5);
-    camera.lookAt(scene.position);
-  }
+  pathLine2.material.dashSize = fraction * pathLength;
+  pathLine2.geometry.attributes.position.needsUpdate = true;
+  // animate the camera path
+  var time = -performance.now() * 0.0003;
+  camera.position.x = 10 * Math.cos(time / 5);
+  camera.position.z = 10 * Math.sin(time / 5);
+  camera.lookAt(scene.position);
 
-  if (freeze) {
+  if (soundOn) {
     // find intersections
     raycaster.setFromCamera(mouse, camera);
 
@@ -411,35 +406,59 @@ for (let button of generateButtons) {
 const about = document.getElementById("about");
 const description = document.getElementById("description");
 const howto = document.getElementById("howto");
+const audioButton = document.getElementById("audio");
 
 const showAbout = document.getElementById("question");
 showAbout.addEventListener("click", () => {
   about.style.display = "flex";
 });
 
-const freezeButton = document.getElementById("keep");
-freezeButton.addEventListener("click", () => {
-  freeze = !freeze;
-  if (freeze) {
-    freezeButton.innerText = "I would like to return now";
-  } else {
-    freezeButton.innerText = "I would like to stay";
-  }
-});
-
 const controlsButton = document.getElementById("controls");
+const closeAbout = document.getElementById("close");
+
 controlsButton.addEventListener("click", () => {
   description.style.display = "none";
+  closeAbout.style.display = "block";
   howto.style.display = "flex";
   controlsButton.style.display = "none";
 });
-
-const closeAbout = document.getElementById("close");
-closeAbout.addEventListener("click", () => {
+let soundOn = false;
+let soundStarted = false;
+closeAbout.addEventListener("click", async () => {
   about.style.display = "none";
   description.style.display = "flex";
   howto.style.display = "none";
   controlsButton.style.display = "block";
+  if (!soundStarted) {
+    await Tone.start();
+    soundStarted = true;
+    soundOn = true;
+  }
+});
+const uiButtons = document.getElementById("ui");
+const chatroom = document.getElementById("chatroom-container");
+const social = document.getElementById("social");
+
+let cleared = false;
+
+const clear = document.getElementById("clear");
+clear.addEventListener("click", () => {
+  if (!cleared) {
+    uiButtons.classList.add("slide-left");
+    chatroom.classList.add("slide-left");
+    showAbout.classList.add("slide-right");
+    audioButton.classList.add("slide-right");
+    social.classList.add("slide-right");
+    clear.innerText = "«";
+  } else {
+    uiButtons.classList.remove("slide-left");
+    chatroom.classList.remove("slide-left");
+    showAbout.classList.remove("slide-right");
+    audioButton.classList.remove("slide-right");
+    social.classList.remove("slide-right");
+    clear.innerText = "»";
+  }
+  cleared = !cleared;
 });
 
 function generateNewSpace() {
@@ -476,36 +495,32 @@ function onDocumentMouseMove(event) {
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
-// SOUND
-//create a synth and connect it to the main output (your speakers)
-let soundOn = true;
-const audioButton = document.getElementById("audio");
+let playGeometry;
+
 audioButton.addEventListener("click", () => {
   soundOn = !soundOn;
   if (soundOn) {
     audioButton.innerText = "·)))";
     audioButton.classList.remove("muted");
-    Tone.Master.mute = false;
+    Tone.Destination.mute = false;
   } else {
     audioButton.innerText = "-)))";
     audioButton.classList.add("muted");
-    Tone.Master.mute = true;
+    Tone.Destination.mute = true;
   }
 });
-freezeButton.addEventListener("click", async () => {
-  await Tone.start();
-});
 
+const vol = new Tone.Volume(-12).toDestination();
 var dist = new Tone.Distortion(0.8);
-var reverb = new Tone.JCReverb(0.7).connect(Tone.Master);
+var reverb = new Tone.JCReverb(0.7).connect(vol);
 var feedbackDelay = new Tone.FeedbackDelay("8n", 0.5);
 const synth = new Tone.PluckSynth().chain(feedbackDelay, reverb);
 
-var reverb2 = new Tone.JCReverb(0.4).connect(Tone.Master);
+var reverb2 = new Tone.JCReverb(0.4).connect(vol);
 var feedbackDelay2 = new Tone.FeedbackDelay("8n", 0.9);
 const synth2 = new Tone.Synth().chain(dist, feedbackDelay2, reverb2);
 
-var reverb2 = new Tone.JCReverb(0.9).connect(Tone.Master);
+var reverb2 = new Tone.JCReverb(0.9).connect(vol);
 var tremolo = new Tone.Tremolo(9, 0.75).start();
 var polySynth = new Tone.PolySynth().chain(tremolo, reverb2);
 

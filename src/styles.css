@@ -105,6 +105,20 @@ li {
 #social:hover {
   color: #d6ad3d;
 }
+#clear {
+  background: none;
+  font-size: 2rem;
+  color: #fff;
+  border: 1px solid #fff;
+  position: absolute;
+  right: 2rem;
+  bottom: 50%;
+  padding: 1rem 0.4rem 1.2rem 0.4rem;
+  text-decoration: none;
+}
+#clear:hover {
+  color: #34eb64;
+}
 #audio {
   right: 6rem;
   opacity: 1;
@@ -125,6 +139,7 @@ li {
   background-color: black;
   border: 1px solid white;
   width: 12rem;
+  display: none;
 }
 #close:hover {
   background-color: red;
@@ -139,47 +154,73 @@ li {
   background-color: black;
   border: 1px solid white;
   width: 12rem;
-  margin-bottom: 1rem;
 }
 #controls:hover {
   background-color: blue;
   color: black;
   border-color: black;
 }
+.buttons {
+  display: flex;
+}
+.buttons button:first-child {
+  margin-right: 1rem;
+}
 .container {
   width: 100%;
   height: 100%;
   display: flex;
-  align-items: center;
   justify-content: center;
 }
 #about {
-  padding: 6rem;
+  padding: 3rem;
   opacity: 0.95;
-  height: 70%;
-  width: 70%;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 80%;
+  width: 80%;
   background: black;
   font-size: 2rem;
   color: #fff;
   border: 1px solid #fff;
   position: absolute;
   z-index: 3;
-  display: none;
-  overflow-y: scroll;
-  display: none;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
 }
 h3 {
-  margin: 0;
+  margin: 0 0 2rem 0;
 }
 #description {
   display: flex;
   flex-direction: column;
+  height: 80%;
+  overflow-y: scroll;
+  margin-bottom: 2rem;
+  padding-right: 1rem;
+  flex-grow: 1;
 }
+#description::-webkit-scrollbar,
+#howto::-webkit-scrollbar {
+  width: 1rem;
+}
+
+#description::-webkit-scrollbar-thumb,
+#howto::-webkit-scrollbar-thumb {
+  background-color: darkgrey;
+  outline: 1px solid slategrey;
+}
+
 #howto {
   display: none;
+  flex-direction: column;
+  overflow-y: scroll;
+  height: 80%;
+  flex-grow: 1;
+  margin-bottom: 2rem;
+  padding-right: 1rem;
 }
 #about p {
   margin-top: 0;
@@ -285,4 +326,69 @@ h3 {
   color: white;
   top: -1.5rem;
   color: white;
+}
+
+.slide {
+  transition: top 1s, bottom 1s, left 1s, right 1s;
+}
+
+#ui.slide-left,
+#chatroom-container.slide-left {
+  left: -20rem;
+}
+#question.slide-right,
+#audio.slide-right,
+#social.slide-right {
+  right: -20rem;
+}
+
+@media screen and (max-width: 767px) {
+  h3 {
+    font-size: 2rem;
+  }
+  #about {
+    padding: 1.5rem;
+    height: 85%;
+  }
+  #description {
+    padding-right: 0.5rem;
+  }
+  #about li {
+    margin-bottom: 1rem;
+  }
+  #about ul {
+    margin-top: 0rem;
+  }
+  #question {
+    top: 4rem;
+    right: 0.5rem;
+  }
+  #audio {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  #ui {
+    top: 0.5rem;
+    left: 0.5rem;
+  }
+  #social {
+    bottom: 0.5rem;
+    right: 0.5rem;
+  }
+  #chatroom-container {
+    left: 0.5rem;
+    bottom: 0.5rem;
+  }
+  #messages {
+    width: 9rem;
+  }
+  #name-input,
+  #message-input {
+    width: 5.5rem;
+  }
+  #clear {
+    right: 0.5rem;
+    bottom: 50%;
+    transform: translateY(50%);
+  }
 }
