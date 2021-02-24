@@ -178,8 +178,8 @@ li {
   opacity: 0.95;
   top: 50%;
   transform: translateY(-50%);
-  height: 80%;
-  width: 50%;
+  height: 75%;
+  width: 70%;
   background: black;
   font-size: 2rem;
   color: #fff;
@@ -345,10 +345,11 @@ h3 {
 
 @media screen and (max-width: 767px) {
   h3 {
-    font-size: 2rem;
+    font-size: 1.7rem;
   }
   #about {
     padding: 1.5rem;
+    font-size: 1.5rem;
     height: 85%;
     width: 80%;
   }
