@@ -3,6 +3,7 @@ body {
   font-family: "VT323", monospace;
   margin: 0;
   overflow: hidden;
+  background-color: black;
 }
 ::-webkit-scrollbar {
   width: 0px;
@@ -173,12 +174,12 @@ li {
   justify-content: center;
 }
 #about {
-  padding: 3rem;
+  padding: 5rem;
   opacity: 0.95;
   top: 50%;
   transform: translateY(-50%);
   height: 80%;
-  width: 80%;
+  width: 50%;
   background: black;
   font-size: 2rem;
   color: #fff;
@@ -349,6 +350,7 @@ h3 {
   #about {
     padding: 1.5rem;
     height: 85%;
+    width: 80%;
   }
   #description {
     padding-right: 0.5rem;
